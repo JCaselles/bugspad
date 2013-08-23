@@ -22,12 +22,12 @@ Python's developers strive to avoid premature optimization, and moreover, reject
 An important goal of the Python developers is making Python fun to use. This is reflected in the origin of the name which comes from Monty Python,[34] and in an occasionally playful approach to tutorials and reference materials, for example using spam and eggs instead of the standard foo and bar.[35][36]
 """
 data = [s1, s2, s3]
-url = "http://127.0.0.1:9998/bug/comment/"
+url = "http://127.0.0.1:9998/comment/"
 for x in range(140000, 200000):
 	for i in range(1,random.randint(1,20)):
 		cid = random.randint(0,2)
 		desc = data[cid]
-		d = {'user': 'kushaldas@gmail.com', "password": 'asdf', "bug_id": x, "desc": desc}
+		d = {'user': 'kushaldas@gmail.com', "password": 'asdf', "bug_id": i, "desc": desc}
 		r = requests.post(url, data=json.dumps(d))
 		print "comment id", r.text
 	print x
