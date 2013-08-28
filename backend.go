@@ -167,7 +167,7 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 	}
 	defer db.Close()
 
-	var status string
+	var status, summary string
 	var buffer, buffer2 bytes.Buffer
 	vals := make([]interface{}, 0)
 	buffer.WriteString("INSERT INTO bugs (")
@@ -219,6 +219,13 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 		vals = append(vals, val)
 	}
 
+	val, ok = data["subcomponent_id"]
+	if ok {
+		buffer.WriteString(", subcomponent_id")
+		buffer2.WriteString(",?")
+		vals = append(vals, val)
+	}
+
 	val, ok = data["reporter"]
 	if ok {
 		buffer.WriteString(", reporter")
@@ -233,6 +240,7 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 		buffer.WriteString(", summary")
 		buffer2.WriteString(",?")
 		vals = append(vals, val)
+		summary = val.(string)
 	} else {
 		return "Missing input: summary", nil
 	}
@@ -271,6 +279,7 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 	bug_id := strconv.FormatInt(rid, 10)
 	// Now update redis cache for status
 	update_redis_bug_status(bug_id, status)
+	set_redis_bug(rid, status, summary)
 	add_latest_created(bug_id)
 	return bug_id, err
 }
@@ -343,6 +352,12 @@ func update_bug(data map[string]interface{}) {
 	val, ok = data["whiteboard"]
 	if ok {
 		buffer.WriteString(", whiteboard=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["subcomponent_id"]
+	if ok {
+		buffer.WriteString(", subcomponent_id=?")
 		vals = append(vals, val)
 	}
 

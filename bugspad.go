@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type Result1 map[string]string
@@ -20,6 +21,7 @@ func myrecover(w http.ResponseWriter) {
 }
 
 func product(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
 		defer myrecover(w)
@@ -48,6 +50,7 @@ func product(w http.ResponseWriter, r *http.Request) {
 }
 
 func component(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
 		defer myrecover(w)
@@ -79,6 +82,7 @@ func component(w http.ResponseWriter, r *http.Request) {
 }
 
 func components(w http.ResponseWriter, r *http.Request) {
+	product_id := ""
 	if r.Method == "POST" {
 		decoder := json.NewDecoder(r.Body)
 		pdata := make(map[string]string)
@@ -87,17 +91,32 @@ func components(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 		// name := pdata["name"].(string)
-		product_id := pdata["product_id"]
-		if product_id != "" {
-			m := get_components_by_id(product_id)
-			res_json, _ := json.Marshal(m)
-			fmt.Fprintln(w, string(res_json))
+		product_id = pdata["product_id"]
+
+	} else if r.Method == "GET" {
+		title := r.URL.Path[12:]
+
+		if title == "" {
+			return
 		}
 
+		index := strings.Index(title, "/")
+		if index != -1 {
+			title = title[:index]
+		}
+		product_id = title
+
+	}
+	if product_id != "" {
+		w.Header().Set("Content-Type", "application/json")
+		m := get_components_by_id(product_id)
+		res_json, _ := json.Marshal(m)
+		fmt.Fprintln(w, string(res_json))
 	}
 }
 
 func create_bug(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
 		//defer myrecover(w)
@@ -134,6 +153,7 @@ func create_bug(w http.ResponseWriter, r *http.Request) {
 }
 
 func updatebug(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
 		defer myrecover(w)
@@ -155,6 +175,7 @@ func updatebug(w http.ResponseWriter, r *http.Request) {
 }
 
 func comment(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "POST" {
 		decoder := json.NewDecoder(r.Body)
 		pdata := make(map[string]interface{})
@@ -180,6 +201,7 @@ func comment(w http.ResponseWriter, r *http.Request) {
 }
 
 func bug_cc(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
 		defer myrecover(w)
@@ -212,6 +234,7 @@ func bug_cc(w http.ResponseWriter, r *http.Request) {
 API call to get latest 10 bugs from the server
 */
 func latest_bugs(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	vals := get_latest_created_list().([]interface{})
 	m := make([]string, 0)
 	if vals != nil {
@@ -226,6 +249,7 @@ func latest_bugs(w http.ResponseWriter, r *http.Request) {
 }
 
 func latest_updated_bugs(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	vals := get_latest_updated_list().([]interface{})
 	m := make([]string, 0)
 	if vals != nil {
